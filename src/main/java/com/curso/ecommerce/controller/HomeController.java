@@ -26,6 +26,8 @@ import com.curso.ecommerce.service.IOrdenService;
 import com.curso.ecommerce.service.IUsuarioService;
 import com.curso.ecommerce.service.ProductoService;
 
+import jakarta.servlet.http.HttpSession;
+
 @Controller
 @RequestMapping("/")
 public class HomeController {
@@ -53,7 +55,9 @@ public class HomeController {
 	Orden orden = new Orden();
 
 	@GetMapping("")
-	public String home(Model model) {
+	public String home(Model model, HttpSession session) {
+		
+		log.info("Sesion del usuario: {}", session.getAttribute("idusuario"));
 
 		model.addAttribute("productos", productoService.findAll());
 
@@ -145,9 +149,9 @@ public class HomeController {
 	}
 	
 	@GetMapping("/order")
-	public String order(Model model) {
+	public String order(Model model, HttpSession session) {
 		
-		Usuario usuario = usuarioService.findById(1).get();
+		Usuario usuario = usuarioService.findById(Integer.parseInt(session.getAttribute("idusuario").toString())).get();
 		
 		model.addAttribute("cart", detalles);
 		model.addAttribute("orden", orden);
@@ -158,13 +162,13 @@ public class HomeController {
 	
 	//guardar la orden
 	@GetMapping("/saveOrder")
-	public String saveOrden() {
+	public String saveOrden(HttpSession session) {
 		Date fechaCreacion = new Date();
 		orden.setFechaCreacion(fechaCreacion);
 		orden.setNumero(ordenService.generarNumeroOrden());
 		
 		//usuario
-		Usuario usuario = usuarioService.findById(1).get();
+		Usuario usuario = usuarioService.findById(Integer.parseInt(session.getAttribute("idusuario").toString())).get();
 		
 		orden.setUsuario(usuario);
 		ordenService.save(orden);
